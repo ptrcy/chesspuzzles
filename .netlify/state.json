@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Beirut",
+			"country": {
+				"code": "LB",
+				"name": "Lebanon"
+			},
+			"subdivision": {
+				"code": "BA",
+				"name": "Beyrouth"
+			},
+			"timezone": "Asia/Beirut",
+			"latitude": 33.8916,
+			"longitude": 35.5024
+		},
+		"timestamp": 1764393466369
+	}
+}

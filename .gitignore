@@ -1,0 +1,27 @@
+# ---- Node Basics ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Build Output ----
+dist/
+build/
+coverage/
+
+# ---- Environment Variables ----
+.env
+.env.local
+.env.*.local
+
+# ---- OS / Editor ----
+.DS_Store
+Thumbs.db
+
+# ---- TypeScript ----
+*.tsbuildinfo
+
+# ---- Logs ----
+logs/
+*.log

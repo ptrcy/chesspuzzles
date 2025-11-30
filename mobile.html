@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chess Mobile</title>
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.base.css">
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.brown.css">
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.cburnett.css">
+    <link rel="stylesheet" href="/src/mobile.css">
+</head>
+
+<body>
+    <div class="mobile-container">
+        <!-- Board Container with Border Turn Indicator -->
+        <div id="boardContainer" class="board-container turn-white">
+            <div id="chessboard" class="blue merida"></div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="mobile-controls">
+            <button id="undoBtn" class="mobile-btn" title="Undo Move">↶</button>
+            <button id="cameraBtn" class="mobile-btn" title="Scan Board">📷</button>
+            <button id="flipBtn" class="mobile-btn" title="Flip Board">⇅</button>
+            <button id="redoBtn" class="mobile-btn" title="Redo Move">↷</button>
+        </div>
+
+        <!-- Setup Controls Overlay -->
+        <div id="setupControls" class="setup-controls" style="display: none;">
+            <div class="setup-header">Adjust Board Setup</div>
+            <div class="setup-buttons">
+                <button id="toggleTurnBtn" class="mobile-btn">White to Move</button>
+                <button id="rotateBoardBtn" class="mobile-btn">Rotate Board 180°</button>
+            </div>
+            <button id="confirmSetupBtn" class="confirm-btn">Start Playing</button>
+        </div>
+
+        <!-- Hidden controls for functionality -->
+        <div style="display: none;">
+            <input type="text" id="fenInput" />
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" />
+            <div id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/mobile.js"></script>
+</body>
+
+</html>

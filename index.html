@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lichess Board Analyzer</title>
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.base.css">
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.brown.css">
+    <link rel="stylesheet" href="/node_modules/chessground/assets/chessground.cburnett.css">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Chess Board Analyzer</h1>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Column: Board & FEN -->
+            <div class="left-column">
+                <div class="board-wrapper">
+                    <div id="turnIndicator" class="turn-indicator-star" title="White to move"></div>
+                    <div id="chessboard" class="blue merida"></div>
+                </div>
+
+                <div class="fen-input-section">
+                    <label for="fenInput">FEN Position:</label>
+                    <div class="input-group">
+                        <span class="input-icon">FEN</span>
+                        <input type="text" id="fenInput"
+                            placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+                            aria-label="FEN input" />
+                        <button id="fenCopyBtn" class="icon-btn" type="button" aria-label="Copy FEN to clipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="feather feather-copy">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="fenError" class="error-message" role="alert"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="sidebar">
+
+                <!-- Section 1: Position Info -->
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <span>Positions</span>
+                        <span id="positionCounter">1 / 1</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="positionProgressBar" class="progress-bar" style="width: 100%;"></div>
+                    </div>
+
+                    <div class="nav-group-label">Position Navigation</div>
+                    <div class="nav-controls">
+                        <button id="prevFenBtn" class="btn btn-secondary" disabled title="Previous Position">&larr;</button>
+                        <button id="nextFenBtn" class="btn btn-secondary" disabled title="Next Position">&rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Section 2: Move Navigation -->
+                <div class="sidebar-section">
+                    <div class="nav-group-label">Move Navigation</div>
+                    <div class="move-controls">
+                        <button id="firstMoveBtn" class="btn btn-primary" disabled title="First Move">|&larr;</button>
+                        <button id="prevMoveBtn" class="btn btn-primary" disabled title="Previous Move">&larr;</button>
+                        <button id="nextMoveBtn" class="btn btn-primary" disabled title="Next Move">&rarr;</button>
+                        <button id="lastMoveBtn" class="btn btn-primary" disabled title="Last Move">&rarr;|</button>
+                    </div>
+                </div>
+
+                <!-- Section 3: Analysis -->
+                <div class="sidebar-section">
+                    <div class="analysis-header">
+                        <button id="toggleAnalysisBtn" class="btn btn-tag">
+                            <span id="analysisLabel">Start Analysis</span>
+                        </button>
+                    </div>
+
+                    <div class="eval-section">
+                        <div class="eval-bar-container">
+                            <div id="evalBar" class="eval-bar"></div>
+                        </div>
+                        <div class="eval-stats">
+                            <span id="evalScore" class="eval-score">+0.00</span>
+                            <span id="evalDepth" class="eval-depth">Depth: -</span>
+                        </div>
+                    </div>
+
+                    <div class="moves-section">
+                        <h3>Top Moves</h3>
+                        <div id="topMovesList" class="top-moves-list">
+                            <div class="move-placeholder">Start analysis...</div>
+                        </div>
+                    </div>
+                    <div id="statusMessage" class="status-message"></div>
+                </div>
+
+                <!-- Section 4: File Loader -->
+                <div class="sidebar-section file-section">
+                    <div id="fileDropZone" class="file-drop-zone">
+                        <input type="file" id="fenFileInput" accept=".fen,.pgn,.txt,image/*" aria-label="Upload FEN or PGN file" hidden>
+                        <div class="drop-content">
+                            <span class="drop-icon">&uarr;</span>
+                            <p>Drop FEN/PGN file here<br>or click to upload</p>
+                        </div>
+                    </div>
+
+                    <div id="fileInfo" class="file-info" style="display: none;">
+                        <div class="file-summary">
+                            <span class="file-label">Loaded file:</span>
+                            <span id="fileName" class="file-name">-</span>
+                        </div>
+                        <div class="file-actions">
+                            <button id="likePositionBtn" class="btn btn-secondary" type="button" disabled title="Save starting position">Save favorite</button>
+                            <button id="removeFileBtn" class="btn btn-text" type="button" title="Remove loaded file">Remove file</button>
+                        </div>
+                    </div>
+
+                    <footer>
+                        <p>Powered by Stockfish WASM - Drag pieces to move</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

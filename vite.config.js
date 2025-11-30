@@ -1,29 +1,20 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './',
+  base: './', // Good for relative paths, keeps it flexible
   build: {
     outDir: 'dist',
     assetsInlineLimit: 0,
     rollupOptions: {
       input: {
-        main: 'index.html',
-        mobile: 'mobile.html'
+        main: 'index.html' 
       },
       output: {
         manualChunks: undefined,
       }
     }
   },
-  server: {
-    proxy: {
-      '/.netlify/functions': {
-        target: 'http://localhost:8888',
-        changeOrigin: true,
-        secure: false,
-      }
-    }
-  },
+  // REMOVED: server block with proxy is no longer needed
   optimizeDeps: {
     exclude: ['stockfish.wasm']
   },

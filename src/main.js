@@ -55,7 +55,9 @@ class BoardAnalyzer {
             fileInfo: document.getElementById('fileInfo'),
             fileName: document.getElementById('fileName'),
             removeFileBtn: document.getElementById('removeFileBtn'),
-            likePositionBtn: document.getElementById('likePositionBtn')
+            likePositionBtn: document.getElementById('likePositionBtn'),
+            loadFavoritesBtn: document.getElementById('loadFavoritesBtn'),
+            favoritesCount: document.getElementById('favoritesCount')
         };
 
         this.init();
@@ -82,6 +84,7 @@ class BoardAnalyzer {
             // Load default position
             this.loadPosition(DEFAULT_FEN);
             this.updateLikeButtonState();
+            this.updateFavoritesCount();
 
         } catch (error) {
             console.error('Initialization error:', error);
@@ -141,6 +144,12 @@ class BoardAnalyzer {
         if (this.elements.likePositionBtn) {
             this.elements.likePositionBtn.addEventListener('click', () => {
                 this.likeCurrentPosition();
+            });
+        }
+
+        if (this.elements.loadFavoritesBtn) {
+            this.elements.loadFavoritesBtn.addEventListener('click', () => {
+                this.loadAllFavorites();
             });
         }
 
@@ -446,15 +455,34 @@ class BoardAnalyzer {
         if (!buttonText) return;
 
         if (hasFile) {
-            const isFav = this.favoritesManager.isFavorite(this.initialFen, this.loadedFileName);
-            if (isFav) {
-                this.elements.likePositionBtn.classList.add('active');
-                this.elements.likePositionBtn.title = 'Remove from favorites';
-                buttonText.textContent = 'Saved to favorites';
+            // When viewing "Favorites", check current position's FEN against all favorites
+            if (this.loadedFileName === 'Favorites') {
+                const currentFen = this.chess.fen();
+                // Check if this exact FEN exists in any favorite
+                const favorites = this.favoritesManager.getAll();
+                const isFav = favorites.some(f => f.fen === currentFen);
+
+                if (isFav) {
+                    this.elements.likePositionBtn.classList.add('active');
+                    this.elements.likePositionBtn.title = 'Remove from favorites';
+                    buttonText.textContent = 'Remove from favorites';
+                } else {
+                    this.elements.likePositionBtn.classList.remove('active');
+                    this.elements.likePositionBtn.title = 'This position is not in favorites';
+                    buttonText.textContent = 'Not in favorites';
+                }
             } else {
-                this.elements.likePositionBtn.classList.remove('active');
-                this.elements.likePositionBtn.title = `Add ${this.loadedFileName} to favorites`;
-                buttonText.textContent = 'Favorite this position';
+                // Normal file - check initial FEN
+                const isFav = this.favoritesManager.isFavorite(this.initialFen, this.loadedFileName);
+                if (isFav) {
+                    this.elements.likePositionBtn.classList.add('active');
+                    this.elements.likePositionBtn.title = 'Remove from favorites';
+                    buttonText.textContent = 'Saved to favorites';
+                } else {
+                    this.elements.likePositionBtn.classList.remove('active');
+                    this.elements.likePositionBtn.title = `Add ${this.loadedFileName} to favorites`;
+                    buttonText.textContent = 'Favorite this position';
+                }
             }
         } else {
             this.elements.likePositionBtn.classList.remove('active');
@@ -472,24 +500,119 @@ class BoardAnalyzer {
             return;
         }
 
-        const fen = this.initialFen;
-        const fileName = this.loadedFileName;
-        const isFav = this.favoritesManager.isFavorite(fen, fileName);
-
         try {
-            if (isFav) {
-                this.favoritesManager.remove(fen, fileName);
-                this.showStatus('Removed from favorites', 'info');
+            // Special handling when viewing "Favorites" file
+            if (this.loadedFileName === 'Favorites') {
+                const currentFen = this.chess.fen();
+                const favorites = this.favoritesManager.getAll();
+
+                // Find and remove this FEN from favorites
+                const favToRemove = favorites.find(f => f.fen === currentFen);
+                if (favToRemove) {
+                    // Save current index before removing
+                    const currentIndex = this.currentFenIndex;
+
+                    this.favoritesManager.remove(favToRemove.fen, favToRemove.fileName);
+                    this.showStatus('Removed from favorites', 'info');
+
+                    // Reload favorites to update the list
+                    setTimeout(() => {
+                        const updatedFavorites = this.favoritesManager.getAll();
+
+                        if (updatedFavorites.length === 0) {
+                            // No more favorites, clear the file
+                            this.clearFile();
+                            return;
+                        }
+
+                        // Sort by date (newest first) to match loadAllFavorites
+                        updatedFavorites.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        const fenStrings = updatedFavorites.map(f => f.fen).join('\n');
+
+                        // Reload the list
+                        this.loadFenList(fenStrings, 'Favorites');
+
+                        // Navigate to the same index, or the previous one if we removed the last item
+                        const newIndex = Math.min(currentIndex, this.fenList.length - 1);
+                        this.currentFenIndex = newIndex;
+                        this.loadPosition(this.fenList[newIndex]);
+
+                        // Update file info UI
+                        this.elements.fileDropZone.style.display = 'none';
+                        this.elements.fileInfo.style.display = 'flex';
+                        this.elements.fileName.textContent = 'Favorites';
+                        this.loadedFileName = 'Favorites';
+                    }, 300);
+                } else {
+                    this.showStatus('Position not found in favorites', 'error');
+                }
             } else {
-                this.favoritesManager.add(fen, fileName);
-                this.showStatus('Saved to favorites', 'success');
+                // Normal file - toggle favorite for initial position
+                const fen = this.initialFen;
+                const fileName = this.loadedFileName;
+                const isFav = this.favoritesManager.isFavorite(fen, fileName);
+
+                if (isFav) {
+                    this.favoritesManager.remove(fen, fileName);
+                    this.showStatus('Removed from favorites', 'info');
+                } else {
+                    this.favoritesManager.add(fen, fileName);
+                    this.showStatus('Saved to favorites', 'success');
+                }
             }
+
             this.updateLikeButtonState();
+            this.updateFavoritesCount();
             setTimeout(() => this.clearStatus(), 1500);
         } catch (error) {
             console.error('Failed to update favorites:', error);
             this.showStatus('Could not update favorites', 'error');
         }
+    }
+
+    /**
+     * Load all favorites as a FEN list
+     */
+    loadAllFavorites() {
+        const favorites = this.favoritesManager.getAll();
+
+        if (favorites.length === 0) {
+            this.showStatus('No favorites saved yet', 'info');
+            setTimeout(() => this.clearStatus(), 2000);
+            return;
+        }
+
+        try {
+            // Sort by date (newest first)
+            favorites.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Extract FENs from favorites
+            const fenStrings = favorites.map(f => f.fen).join('\n');
+
+            // Load all favorites as a FEN list (similar to loading a file)
+            this.loadFenList(fenStrings, 'Favorites');
+
+            // Update file info UI to show "Favorites" as the loaded source
+            this.elements.fileDropZone.style.display = 'none';
+            this.elements.fileInfo.style.display = 'flex';
+            this.elements.fileName.textContent = 'Favorites';
+            this.loadedFileName = 'Favorites';
+
+            this.showStatus(`Loaded ${favorites.length} favorite position(s)`, 'success');
+            setTimeout(() => this.clearStatus(), 2000);
+        } catch (error) {
+            console.error('Failed to load favorites:', error);
+            this.showStatus('Failed to load favorites', 'error');
+        }
+    }
+
+    /**
+     * Update favorites count badge
+     */
+    updateFavoritesCount() {
+        if (!this.elements.favoritesCount) return;
+        const favorites = this.favoritesManager.getAll();
+        this.elements.favoritesCount.textContent = favorites.length;
     }
 
     /**
@@ -1052,6 +1175,7 @@ class BoardAnalyzer {
     clearError() {
         this.elements.fenError.textContent = '';
     }
+
 }
 
 // Initialize the application when DOM is ready

@@ -291,14 +291,19 @@ header h1 {
     border-color: var(--success-color);
 }
 
-/* Favorite Button */
+/* Favorites Controls */
+.favorites-controls {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
 .btn-favorite {
-    width: 100%;
+    flex: 1;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 10px 15px;
-    margin-top: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -336,6 +341,37 @@ header h1 {
 .btn-favorite.active .heart-icon {
     fill: #dc3545;
     stroke: #dc3545;
+}
+
+/* Load Favorites Button */
+.btn-load-favorites {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.btn-load-favorites:hover {
+    background-color: var(--highlight-bg);
+    border-color: #888;
+}
+
+.btn-load-favorites svg {
+    flex-shrink: 0;
+}
+
+#favoritesCount {
+    min-width: 20px;
+    text-align: center;
+    color: var(--text-bright);
 }
 
 .eval-section {
@@ -462,16 +498,50 @@ header h1 {
     gap: 8px;
 }
 
-.btn-text {
-    background: none;
-    border: none;
-    color: #888;
+.btn-remove-file {
+    background: linear-gradient(135deg, rgba(204, 51, 51, 0.4), rgba(204, 51, 51, 0.2));
+    border: 1px solid rgba(204, 51, 51, 0.6);
+    color: var(--text-bright);
     cursor: pointer;
-    font-size: 1.1rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.btn-text:hover {
-    color: var(--danger-color);
+.btn-remove-file:hover {
+    background: linear-gradient(135deg, rgba(204, 51, 51, 0.6), rgba(204, 51, 51, 0.35));
+    border-color: rgba(204, 51, 51, 0.8);
+    color: var(--text-bright);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(204, 51, 51, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.btn-remove-file:active {
+    transform: translateY(0);
+}
+
+.btn-remove-file:focus-visible {
+    outline: 2px solid rgba(204, 51, 51, 0.7);
+    outline-offset: 2px;
+}
+
+.btn-remove-file .remove-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-file svg {
+    display: block;
+    width: 18px;
+    height: 18px;
 }
 
 /* Footer */

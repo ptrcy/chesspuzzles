@@ -278,6 +278,7 @@ class BoardAnalyzer {
             this.updateNavButtons();
             this.updatePositionCounter();
             this.updateTurnIndicator();
+            this.updateLikeButtonState();
 
             // Clear previous analysis
             this.clearArrows();
@@ -441,18 +442,24 @@ class BoardAnalyzer {
         const hasFile = !!this.loadedFileName;
         this.elements.likePositionBtn.disabled = !hasFile;
 
+        const buttonText = this.elements.likePositionBtn.querySelector('span');
+        if (!buttonText) return;
+
         if (hasFile) {
             const isFav = this.favoritesManager.isFavorite(this.initialFen, this.loadedFileName);
             if (isFav) {
                 this.elements.likePositionBtn.classList.add('active');
                 this.elements.likePositionBtn.title = 'Remove from favorites';
+                buttonText.textContent = 'Saved to favorites';
             } else {
                 this.elements.likePositionBtn.classList.remove('active');
-                this.elements.likePositionBtn.title = `Save ${this.loadedFileName} starting position`;
+                this.elements.likePositionBtn.title = `Add ${this.loadedFileName} to favorites`;
+                buttonText.textContent = 'Favorite this position';
             }
         } else {
             this.elements.likePositionBtn.classList.remove('active');
-            this.elements.likePositionBtn.title = 'Load a file to like its starting position';
+            this.elements.likePositionBtn.title = 'Load a file first';
+            buttonText.textContent = 'Favorite this position';
         }
     }
 

@@ -291,6 +291,53 @@ header h1 {
     border-color: var(--success-color);
 }
 
+/* Favorite Button */
+.btn-favorite {
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-top: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.btn-favorite:hover:not(:disabled) {
+    background-color: var(--highlight-bg);
+    border-color: #888;
+}
+
+.btn-favorite:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-favorite.active {
+    background-color: rgba(220, 53, 69, 0.15);
+    border-color: #dc3545;
+    color: var(--text-bright);
+}
+
+.btn-favorite.active:hover:not(:disabled) {
+    background-color: rgba(220, 53, 69, 0.25);
+}
+
+.btn-favorite .heart-icon {
+    transition: all 0.2s ease;
+}
+
+.btn-favorite.active .heart-icon {
+    fill: #dc3545;
+    stroke: #dc3545;
+}
+
 .eval-section {
     margin-bottom: 15px;
 }

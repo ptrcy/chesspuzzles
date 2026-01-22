@@ -44,6 +44,14 @@ body {
 header {
     margin-bottom: 20px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-logo {
+    height: 40px;
+    width: auto;
 }
 
 header h1 {
@@ -389,7 +397,8 @@ header h1 {
 
 .eval-bar {
     height: 100%;
-    background-color: var(--text-bright);
+    width: 50%;
+    background-color: var(--success-color);
     transition: width 0.5s ease;
 }
 

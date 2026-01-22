@@ -923,6 +923,11 @@ class BoardAnalyzer {
         const fen = this.chess.fen();
 
         this.engine.analyze(fen, 15, (result) => {
+            // Don't update display if analysis was stopped
+            if (!this.isAnalysisActive) {
+                return;
+            }
+
             if (result.error) {
                 this.showStatus('Analysis error: ' + result.error, 'error');
                 return;

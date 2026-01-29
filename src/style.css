@@ -116,6 +116,24 @@ header h1 {
     content: '★';
 }
 
+/* Turn-based piece highlighting - indicate which player has to move */
+.board-wrapper.turn-white cg-board piece.white {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+.board-wrapper.turn-black cg-board piece.black {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+/* Dim the pieces of the player who is not to move */
+.board-wrapper.turn-white cg-board piece.black {
+    opacity: 0.7;
+}
+
+.board-wrapper.turn-black cg-board piece.white {
+    opacity: 0.7;
+}
+
 /* FEN Input */
 .fen-input-section {
     width: 100%;
@@ -244,6 +262,35 @@ header h1 {
     align-items: center;
     padding: 8px 0;
     font-size: 1.2rem;
+}
+
+/* Position Input for quick navigation */
+.position-input {
+    width: 50px;
+    padding: 8px 4px;
+    text-align: center;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--text-bright);
+    font-size: 0.9rem;
+    font-family: inherit;
+    -moz-appearance: textfield;
+}
+
+.position-input::-webkit-outer-spin-button,
+.position-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.position-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.position-input::placeholder {
+    color: var(--text-muted);
 }
 
 /* Buttons */

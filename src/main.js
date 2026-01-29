@@ -51,6 +51,7 @@ class BoardAnalyzer {
             turnIndicator: document.getElementById('turnIndicator'),
             positionCounter: document.getElementById('positionCounter'),
             positionProgressBar: document.getElementById('positionProgressBar'),
+            positionInput: document.getElementById('positionInput'),
             fileDropZone: document.getElementById('fileDropZone'),
             fileInfo: document.getElementById('fileInfo'),
             fileName: document.getElementById('fileName'),
@@ -167,6 +168,20 @@ class BoardAnalyzer {
             this.loadNextFen();
         });
 
+        // Position input for quick navigation
+        if (this.elements.positionInput) {
+            this.elements.positionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.jumpToPosition(parseInt(this.elements.positionInput.value, 10));
+                    this.elements.positionInput.blur();
+                }
+            });
+
+            this.elements.positionInput.addEventListener('change', () => {
+                this.jumpToPosition(parseInt(this.elements.positionInput.value, 10));
+            });
+        }
+
         this.elements.prevMoveBtn.addEventListener('click', () => {
             this.goToPrevMove();
         });
@@ -251,8 +266,11 @@ class BoardAnalyzer {
 
     /**
      * Load a position from FEN
+     * @param {string} fen - The FEN string to load
+     * @param {boolean} skipOnError - If true, skip to next position on invalid FEN
+     * @returns {boolean} - True if position loaded successfully, false otherwise
      */
-    loadPosition(fen) {
+    loadPosition(fen, skipOnError = false) {
         try {
             let normalizedFen = fen;
             // Check if FEN is incomplete (missing active color etc.)
@@ -303,8 +321,22 @@ class BoardAnalyzer {
                 this.toggleAnalysis();
             }
 
+            return true;
+
         } catch (error) {
+            // If skipOnError is enabled and we're in a FEN list, try the next position
+            if (skipOnError && this.fenList.length > 0) {
+                const failedIndex = this.fenList.indexOf(fen);
+                if (failedIndex !== -1 && failedIndex < this.fenList.length - 1) {
+                    this.showStatus(`Skipping invalid FEN at position ${failedIndex + 1}`, 'info');
+                    setTimeout(() => this.clearStatus(), 2000);
+                    // Try the next position
+                    this.currentFenIndex = failedIndex + 1;
+                    return this.loadPosition(this.fenList[this.currentFenIndex], true);
+                }
+            }
             this.showError('Invalid FEN: ' + error.message);
+            return false;
         }
     }
 
@@ -643,10 +675,13 @@ class BoardAnalyzer {
 
         console.log('Parsed FENs:', this.fenList.length);
 
-        // Load the first one if available
+        // Load the first valid position
         if (this.fenList.length > 0) {
             this.currentFenIndex = 0;
-            this.loadPosition(this.fenList[0]);
+            // Try to load the first FEN, skip to next if invalid
+            if (!this.loadPosition(this.fenList[0], false)) {
+                this.loadNextFenSkipInvalid();
+            }
         } else {
             this.showError('No valid FENs found in input');
         }
@@ -682,20 +717,100 @@ class BoardAnalyzer {
     }
 
     /**
-     * Load previous FEN
+     * Load previous FEN (skip invalid FENs)
      */
     loadPrevFen() {
         if (this.currentFenIndex > 0) {
-            this.loadPosition(this.fenList[this.currentFenIndex - 1]);
+            this.currentFenIndex--;
+            if (!this.loadPosition(this.fenList[this.currentFenIndex], false)) {
+                // If this FEN is invalid, try the previous one
+                this.loadPrevFenSkipInvalid();
+            }
         }
     }
 
     /**
-     * Load next FEN
+     * Skip backwards to find a valid FEN
+     */
+    loadPrevFenSkipInvalid() {
+        while (this.currentFenIndex > 0) {
+            this.currentFenIndex--;
+            if (this.loadPosition(this.fenList[this.currentFenIndex], false)) {
+                this.showStatus(`Skipped invalid FEN(s)`, 'info');
+                setTimeout(() => this.clearStatus(), 2000);
+                return;
+            }
+        }
+        this.showError('No valid FEN found before this position');
+    }
+
+    /**
+     * Load next FEN (skip invalid FENs)
      */
     loadNextFen() {
         if (this.currentFenIndex < this.fenList.length - 1) {
-            this.loadPosition(this.fenList[this.currentFenIndex + 1]);
+            this.currentFenIndex++;
+            if (!this.loadPosition(this.fenList[this.currentFenIndex], false)) {
+                // If this FEN is invalid, try the next one
+                this.loadNextFenSkipInvalid();
+            }
+        }
+    }
+
+    /**
+     * Skip forward to find a valid FEN
+     */
+    loadNextFenSkipInvalid() {
+        while (this.currentFenIndex < this.fenList.length - 1) {
+            this.currentFenIndex++;
+            if (this.loadPosition(this.fenList[this.currentFenIndex], false)) {
+                this.showStatus(`Skipped invalid FEN(s)`, 'info');
+                setTimeout(() => this.clearStatus(), 2000);
+                return;
+            }
+        }
+        this.showError('No valid FEN found after this position');
+    }
+
+    /**
+     * Jump to a specific position number (1-indexed)
+     */
+    jumpToPosition(positionNumber) {
+        if (this.fenList.length === 0) {
+            this.showStatus('No FEN list loaded', 'info');
+            setTimeout(() => this.clearStatus(), 2000);
+            return;
+        }
+
+        // Validate the position number
+        if (isNaN(positionNumber) || positionNumber < 1) {
+            this.showStatus('Invalid position number', 'error');
+            setTimeout(() => this.clearStatus(), 2000);
+            return;
+        }
+
+        if (positionNumber > this.fenList.length) {
+            this.showStatus(`Position ${positionNumber} out of range (max: ${this.fenList.length})`, 'error');
+            setTimeout(() => this.clearStatus(), 2000);
+            return;
+        }
+
+        // Convert to 0-indexed
+        const targetIndex = positionNumber - 1;
+
+        if (targetIndex === this.currentFenIndex) {
+            return; // Already at this position
+        }
+
+        this.currentFenIndex = targetIndex;
+        if (!this.loadPosition(this.fenList[this.currentFenIndex], false)) {
+            // If invalid, try to find the next valid one
+            this.loadNextFenSkipInvalid();
+        }
+
+        // Clear the input after navigation
+        if (this.elements.positionInput) {
+            this.elements.positionInput.value = '';
         }
     }
 
@@ -898,6 +1013,11 @@ class BoardAnalyzer {
         const offset = turn === 'w' ? 'calc(100% - 24px)' : '6px';
         this.elements.turnIndicator.style.top = offset;
         this.elements.turnIndicator.title = turn === 'w' ? 'White to move' : 'Black to move';
+
+        // Add turn class to board wrapper for piece highlighting
+        const boardWrapper = this.elements.board.parentElement;
+        boardWrapper.classList.remove('turn-white', 'turn-black');
+        boardWrapper.classList.add(turn === 'w' ? 'turn-white' : 'turn-black');
     }
 
     /**
